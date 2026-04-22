@@ -1,0 +1,137 @@
+<p-toast></p-toast>
+
+<div class="flex flex-col gap-4">
+    <!-- Título -->
+    <div class="flex items-center gap-2">
+        <i class="pi pi-check-square text-2xl"></i>
+        <span class="text-3xl font-bold">Persona Jurídica</span>
+    </div>
+
+    <!-- Búsqueda y Acciones -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 auto-rows-fr">
+        <!-- Búsqueda -->
+        <div class="card flex flex-col gap-4 h-full">
+            <div class="font-semibold text-xl">Búsqueda</div>
+            <div class="flex flex-col gap-4">
+                <div class="field">
+                    <label for="state" class="block mb-2">Buscar por:</label>
+                    <p-select id="state" [(ngModel)]="dropdownItem" [options]="tipoBusqueda" optionLabel="name"
+                        placeholder="Seleccionar" class="w-full"></p-select>
+                </div>
+                <div class="field">
+                    <label for="buscar" class="block mb-2">Búsqueda:</label>
+                    <input pInputText id="buscar" [(ngModel)]="textBuscar" type="text"
+                        placeholder="Ingrese texto de búsqueda" class="w-full" />
+                </div>
+                <p-button label="Buscar" icon="pi pi-search" class="w-full" (click)="loadPersonasJuridicas()"
+                    (keydown.enter)="loadPersonasJuridicas()" (keydown)="loadPersonasJuridicas()"></p-button>
+            </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="card flex flex-col gap-4 h-full">
+            <div class="font-semibold text-xl">Acciones</div>
+            <div class="flex flex-col gap-2">
+                <p-button label="Registrar Persona Jurídica" icon="pi pi-plus"
+                    (click)="abrirModalRegistroPersonaJuridica()" (keydown.enter)="abrirModalRegistroPersonaJuridica()"
+                    (keydown)="abrirModalRegistroPersonaJuridica()"></p-button>
+            </div>
+        </div>
+    </div>
+    <!-- Grilla de Resultados -->
+    <div class="card">
+        <p-table [value]="personasJuridicas" class="mi-tabla-personalizada"
+            currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros"
+            [showCurrentPageReport]="true" dataKey="ruc" [rows]="10" [loading]="loading" [rowHover]="true"
+            [showGridlines]="true" [paginator]="true" responsiveLayout="scroll"
+            [totalRecords]="personasJuridicas.length">
+            <ng-template #header let-columns>
+                <tr>
+                    <th scope="col">RUC</th>
+                    <th scope="col">Razón Social</th>
+                    <th scope="col">Representante Legal</th>
+                    <th scope="col" style="text-align: center;">Estado</th>
+                    <th scope="col" style="text-align: center;">Acciones</th>
+                </tr>
+            </ng-template>
+            <ng-template #body let-persona style="cursor: pointer;">
+                <tr [pContextMenuRow]="persona" (click)="onSelectPersona(persona)" (keydown)="onSelectPersona(persona)"
+                    tabindex="0">
+                    <td>{{ persona.identNumber }}</td>
+                    <td>{{ persona.name }}</td>
+                    <td>{{ persona.legalRepresentative }}</td>
+                    <td style="text-align: center;">
+                        <span [ngClass]="persona.status === 'ACTIVE' ? 'p-tag p-tag-success' : 'p-tag p-tag-danger'"
+                            style="font-size: 12px;">{{ persona.status === 'ACTIVE' ? 'Activo' : 'Inactivo' }}</span>
+                    </td>
+                    <td style="text-align: center;">
+                        <div class="flex gap-2 justify-center">
+                            <p-button type="button" icon="pi pi-pencil" severity="secondary" size="small" pRipple
+                                (click)="onEdit(persona, $event)" (keydown.enter)="onEdit(persona, $event)"
+                                (keydown)="onEdit(persona, $event)" pTooltip="Editar"></p-button>
+                            <p-button type="button" icon="pi pi-users" severity="info" size="small" pRipple
+                                (click)="onUsers(persona, $event)" (keydown.enter)="onUsers(persona, $event)"
+                                (keydown)="onUsers(persona, $event)" pTooltip="Usuarios"></p-button>
+                            <p-button type="button" icon="pi pi-file" severity="success" size="small" pRipple
+                                (click)="onAttachments(persona, $event)"
+                                (keydown.enter)="onAttachments(persona, $event)"
+                                (keydown)="onAttachments(persona, $event)" pTooltip="Ver Archivos Adjuntos"></p-button>
+                            <p-button type="button" icon="pi pi-plus-circle" severity="info" size="small" pRipple
+                                (click)="onCreateAccount(persona, $event)"
+                                (keydown.enter)="onCreateAccount(persona, $event)"
+                                (keydown)="onCreateAccount(persona, $event)" pTooltip="Crear Cuenta"></p-button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template #emptymessage>
+                <tr>
+                    <td colspan="5" class="text-center p-4">Sin resultados</td>
+                </tr>
+            </ng-template>
+            <ng-template #loadingbody>
+                <tr>
+                    <td colspan="5" class="text-center p-4">Cargando datos...</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+
+    <!-- Grilla de Cuentas de la Persona Seleccionada -->
+    <div class="card" *ngIf="personaSeleccionada">
+        <div class="mb-4">
+            <h3 class="text-2xl font-bold">Cuentas de {{ personaSeleccionada.razonSocial }}</h3>
+        </div>
+        <p-table [value]="cuentasPersonaSeleccionada" class="mi-tabla-personalizada"
+            currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros"
+            [showCurrentPageReport]="true" dataKey="numeroCuenta" [rows]="10" [rowHover]="true" [showGridlines]="true"
+            [paginator]="true" responsiveLayout="scroll" [totalRecords]="cuentasPersonaSeleccionada.length">
+            <ng-template #header let-columns>
+                <tr>
+                    <th scope="col">Producto</th>
+                    <th scope="col">Número de Cuenta</th>
+                    <th scope="col" style="text-align: center;">Estado</th>
+                    <th scope="col" style="text-align: center;">Fecha de Apertura</th>
+                    <th scope="col" style="text-align: center;">Fecha de Cierre</th>
+                </tr>
+            </ng-template>
+            <ng-template #body let-cuenta style="cursor: pointer;">
+                <tr>
+                    <td>{{ cuenta.accounts[0].product }}</td>
+                    <td>{{ cuenta.accounts[0].accountNumber }}</td>
+                    <td style="text-align: center;">
+                        <span [ngClass]="cuenta.accounts[0].accountStatus === 'Activo' ? 'p-tag p-tag-success' : 'p-tag p-tag-danger'"
+                            style="font-size: 12px;">{{ cuenta.accounts[0].accountStatus }}</span>
+                    </td>
+                    <td style="text-align: center;">{{ cuenta.accounts[0].accountOpeningDate | date:'dd/MM/yyyy' }}</td>
+                    <td style="text-align: center;">{{ cuenta.accounts[0].accountClosingDate ? (cuenta.accounts[0].accountClosingDate | date:'dd/MM/yyyy') :
+                        '-' }}</td>
+                </tr>
+            </ng-template>
+            <ng-template #emptymessage>
+                <tr>
+                    <td colspan="5" class="text-center p-4">Sin cuentas</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>

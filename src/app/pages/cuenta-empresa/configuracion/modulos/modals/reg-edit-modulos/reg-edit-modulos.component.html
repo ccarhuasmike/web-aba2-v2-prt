@@ -1,0 +1,20 @@
+<div class="grid grid-cols-1 gap-4">
+    <p-toast></p-toast>
+    <form [formGroup]="formAddPerfil">
+        <div class="md:col-span-1">
+            <label for="nombre" class="block mb-1 text-sm">Nombre Modulo</label>
+            <input id="nombre" class="w-full" type="text" name="nombre" formControlName="nombre" pInputText
+                autocomplete="off">
+        </div>
+        <div class="md:col-span-1">
+            <label for="descripcion" class="block mb-1 text-sm">Descripción </label>
+            <input id="descripcion" class="w-full" type="text" name="descripcion" formControlName="descripcion"
+                pInputText autocomplete="off">
+        </div>      
+        <div class="md:col-span-1 flex items-end justify-end gap-2 footer-modal">          
+            <p-button label="Guardar" [text]="true" severity="secondary"  *ngIf="isUpdate" [disabled]="!formAddPerfil.valid || disableButtonAdd" (click)="guardar()" (keydown.enter)="guardar()" (keydown)="guardar()" />
+            <p-button label="Actualizar" [text]="true" severity="secondary" *ngIf="!isUpdate" [disabled]="!formAddPerfil.valid || disableButtonUpdate " (click)="updatePerfil()" (keydown.enter)="updatePerfil()" (keydown)="updatePerfil()" />
+            <p-button label="Cerrar"  (click)="cancelar()" (keydown.enter)="cancelar()" (keydown)="cancelar()" />
+        </div>
+    </form>
+</div>

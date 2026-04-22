@@ -1,0 +1,25 @@
+:host ::ng-deep {
+    .p-dialog {
+        max-width: 90vw;
+    }
+
+    .footer-modal {
+        padding-top: 1rem;
+        border-top: 1px solid #e5e7eb;
+        margin-top: 1rem;
+    }
+
+    .ng-invalid.ng-touched {
+        border-color: #ef4444 !important;
+    }
+
+    .p-inputtext.ng-invalid.ng-touched,
+    .p-select.ng-invalid.ng-touched {
+        border-color: #ef4444 !important;
+    }
+
+    .p-message {
+        display: block;
+        margin-top: 0.25rem;
+    }
+}

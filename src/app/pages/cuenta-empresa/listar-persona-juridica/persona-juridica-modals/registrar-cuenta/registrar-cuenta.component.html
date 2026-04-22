@@ -1,0 +1,118 @@
+<div class="grid grid-cols-1 gap-4">
+    <p-toast></p-toast>
+
+    <!-- Título -->
+    <div>
+        <h2 class="text-2xl font-bold">Crear Nueva Cuenta</h2>
+        <p class="text-sm text-gray-500">Registre una nueva cuenta para: {{ personaJuridica.razonSocial }}</p>
+    </div>
+
+    <!-- Formulario -->
+    <form [formGroup]="formCuenta" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Tipo de Cuenta -->
+        <div>
+            <label for="tipoCuenta" class="block mb-2 text-sm font-medium">Tipo de Cuenta *</label>
+            <p-select id="tipoCuenta" [options]="tiposCuenta" formControlName="tipoCuenta" optionLabel="label"
+                optionValue="value" placeholder="Seleccione tipo de cuenta" class="w-full"></p-select>
+        </div>
+
+        <!-- Moneda -->
+        <div>
+            <label for="cantidadAprobadores" class="block mb-2 text-sm font-medium">Cantidad Aprobaciones </label>
+            <input id="cantidadAprobadores" pInputText type="text" class="w-full" readonly="readonly"
+                formControlName="cantidadAprobadores" placeholder="Dirección completa"
+                [ngClass]="{'ng-invalid': formCuenta.get('cantidadAprobadores')?.invalid && formCuenta.get('cantidadAprobadores')?.dirty}" />
+
+        </div>
+    </form>
+
+    <!-- Documentos Obligatorios -->
+    <div class="border-t pt-4">
+        <h3 class="text-lg font-semibold mb-4">Documentos Obligatorios</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Solicitud de Apertura -->
+            <div>
+                <label for="solicitudApertura" class="block mb-2 text-sm font-medium">Solicitud de Apertura Firmada
+                    *</label>
+                <p-fileUpload id="solicitudApertura" name="solicitud" customUpload="true" accept=".pdf,.doc,.docx"
+                    maxFileSize="5000000" invalidFileTypeMessageSummary="Archivo inválido"
+                    invalidFileTypeMessageDetail="Extensiones permitidas: .pdf, .doc, .docx" uploadLabel="Cargar"
+                    cancelLabel="Cancelar" chooseLabel="Seleccionar archivo" [showUploadButton]="false"
+                    [showCancelButton]="false" (onSelect)="onUploadSolicitud($event)">
+                </p-fileUpload>
+                <div *ngIf="solicitudApertura" class="mt-2 flex items-center gap-2">
+                    <i class="pi pi-file text-green-600"></i>
+                    <span class="text-sm text-gray-700">{{ solicitudApertura.name }}</span>
+                    <p-button icon="pi pi-times" severity="danger" text size="small"
+                        (click)="eliminarArchivo('solicitud')" (keydown.enter)="eliminarArchivo('solicitud')"
+                        (keydown)="eliminarArchivo('solicitud')"></p-button>
+                </div>
+            </div>
+
+            <!-- Cartilla Informativa -->
+            <div>
+                <label for="cartillaInformativa" class="block mb-2 text-sm font-medium">Cartilla Informativa *</label>
+                <p-fileUpload id="cartillaInformativa" name="cartilla" customUpload="true" accept=".pdf,.doc,.docx"
+                    maxFileSize="5000000" invalidFileTypeMessageSummary="Archivo inválido"
+                    invalidFileTypeMessageDetail="Extensiones permitidas: .pdf, .doc, .docx" uploadLabel="Cargar"
+                    cancelLabel="Cancelar" chooseLabel="Seleccionar archivo" [showUploadButton]="false"
+                    [showCancelButton]="false" (onSelect)="onUploadCartilla($event)">
+                </p-fileUpload>
+                <div *ngIf="cartillaInformativa" class="mt-2 flex items-center gap-2">
+                    <i class="pi pi-file text-green-600"></i>
+                    <span class="text-sm text-gray-700">{{ cartillaInformativa.name }}</span>
+                    <p-button icon="pi pi-times" severity="danger" text size="small"
+                        (click)="eliminarArchivo('cartilla')" (keydown.enter)="eliminarArchivo('cartilla')"
+                        (keydown)="eliminarArchivo('cartilla')"></p-button>
+                </div>
+            </div>
+
+            <!-- Términos y Condiciones -->
+            <div>
+                <label for="terminosCondiciones" class="block mb-2 text-sm font-medium">Términos y Condiciones Aceptados
+                    *</label>
+                <p-fileUpload id="terminosCondiciones" name="terminos" customUpload="true" accept=".pdf,.doc,.docx"
+                    maxFileSize="5000000" invalidFileTypeMessageSummary="Archivo inválido"
+                    invalidFileTypeMessageDetail="Extensiones permitidas: .pdf, .doc, .docx" uploadLabel="Cargar"
+                    cancelLabel="Cancelar" chooseLabel="Seleccionar archivo" [showUploadButton]="false"
+                    [showCancelButton]="false" (onSelect)="onUploadTerminos($event)">
+                </p-fileUpload>
+                <div *ngIf="terminosCondiciones" class="mt-2 flex items-center gap-2">
+                    <i class="pi pi-file text-green-600"></i>
+                    <span class="text-sm text-gray-700">{{ terminosCondiciones.name }}</span>
+                    <p-button icon="pi pi-times" severity="danger" text size="small"
+                        (click)="eliminarArchivo('terminos')" (keydown.enter)="eliminarArchivo('terminos')"
+                        (keydown)="eliminarArchivo('terminos')"></p-button>
+                </div>
+            </div>
+
+            <!-- Contrato de Cuenta Empresa -->
+            <div>
+                <label for="contratoEmpresa" class="block mb-2 text-sm font-medium">Contrato de Cuenta Empresa *</label>
+                <p-fileUpload id="contratoEmpresa" name="contrato" customUpload="true" accept=".pdf,.doc,.docx"
+                    maxFileSize="5000000" invalidFileTypeMessageSummary="Archivo inválido"
+                    invalidFileTypeMessageDetail="Extensiones permitidas: .pdf, .doc, .docx" uploadLabel="Cargar"
+                    cancelLabel="Cancelar" chooseLabel="Seleccionar archivo" [showUploadButton]="false"
+                    [showCancelButton]="false" (onSelect)="onUploadContrato($event)">
+                </p-fileUpload>
+                <div *ngIf="contratoEmpresa" class="mt-2 flex items-center gap-2">
+                    <i class="pi pi-file text-green-600"></i>
+                    <span class="text-sm text-gray-700">{{ contratoEmpresa.name }}</span>
+                    <p-button icon="pi pi-times" severity="danger" text size="small"
+                        (click)="eliminarArchivo('contrato')" (keydown.enter)="eliminarArchivo('contrato')"
+                        (keydown)="eliminarArchivo('contrato')"></p-button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botones de Acción -->
+    <div class="flex justify-end gap-2">
+        <p-button label="Cancelar" severity="secondary" (click)="cancelar()" (keydown.enter)="cancelar()"
+            (keydown)="cancelar()"></p-button>
+        <p-button label="Registrar"
+            [disabled]="formCuenta.invalid || !solicitudApertura || !cartillaInformativa || !terminosCondiciones || !contratoEmpresa"
+            (click)="registrar()" (keydown.enter)="registrar()" (keydown)="registrar()"></p-button>
+    </div>
+</div>

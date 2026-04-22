@@ -1,0 +1,106 @@
+<p-toast></p-toast>
+<br>
+<form [formGroup]="formLiberacion" novalidate>
+    <div class="grid grid-flow-row-dense sm:grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="md:col-span-1">
+            <span class="font-bold">Cuenta:&nbsp;</span>
+            <span class="secondary-text">{{datosCuenta.numeroCuenta}}</span>
+        </div>
+        <div class="md:col-span-2">
+            <span class="font-bold">Tarjeta:&nbsp;</span>
+            <span class="secondary-text">{{datosAutorizacion.tarjeta.enmascarado}}</span>
+        </div>
+        <p-divider class="md:col-span-3"></p-divider>
+
+        <div class="md:col-span-3">
+            <h4><u>Transaccion</u></h4>
+        </div>
+        <div class="md:col-span-3">
+            <span class="font-bold">Id Transaccion:&nbsp;</span>
+            <span class="secondary-text">{{datosAutorizacion.idTransaccion}}</span>
+        </div>
+        <div class="md:col-span-1">
+            <span class="font-bold">Fecha Transaccion:&nbsp;</span>
+            <span class="secondary-text">{{datosAutorizacion.fechaTransaccion}}</span>
+        </div>
+        <div class="md:col-span-1">
+            <span class="font-bold">Num. Tarjeta:&nbsp;</span>
+            <span class="secondary-text">{{datosAutorizacion.tarjeta.enmascarado}}</span>
+        </div>
+        <div class="md:col-span-1">
+            <span class="font-bold">Token:&nbsp;</span>
+            <span class="secondary-text">{{datosAutorizacion.tarjeta.token}}</span>
+        </div>
+        <div class="md:col-span-1">
+            <span class="font-bold">Cod. Descripcion:&nbsp;</span>
+            <span class="secondary-text">{{datosAutorizacion.transaccionResponse.ftcCode}}</span>
+        </div>
+        <div class="md:col-span-2">
+            <span class="font-bold">Descripcion:&nbsp;</span>
+            <span class="secondary-text">{{datosAutorizacion.transaccionResponse.ftcDescription}}</span>
+        </div>
+        <div class="md:col-span-1">
+            <span class="font-bold">Referencia:&nbsp;</span>
+            <span class="secondary-text">{{datosAutorizacion.referencia}}</span>
+        </div>
+        <div class="md:col-span-1">
+            <span class="font-bold">Cod. Autorizacion:&nbsp;</span>
+            <span class="secondary-text">{{datosAutorizacion.codigoAutorizacion}}</span>
+        </div>
+        <div class="md:col-span-1">
+            <span class="font-bold">Importe:&nbsp;</span>
+            <span class="secondary-text">{{datosAutorizacion.transaccionProcesada.monto | currency:"&nbsp;":"symbol":'1.2-2'}}</span>
+        </div>
+        <div class="md:col-span-1">
+            <span class="font-bold">Red:&nbsp;</span>
+            <span class="secondary-text">{{datosAutorizacion.descOrigenInt}}</span>
+        </div>
+        <div class="md:col-span-2">
+            <span class="font-bold">Estado Confirmacion:&nbsp;</span>
+            <div *ngIf="datosAutorizacion.estadoAutorizacion=='REJECTED'; else estadoConfirmacion">
+                <span></span>
+            </div>
+            <ng-template #estadoConfirmacion>
+                <span [ngSwitch]="datosAutorizacion?.estadoConfirmacion">
+                    <span *ngSwitchCase="'CONFIRMED'" class="p-tag p-tag-success" style="font-size: 12px;">{{datosAutorizacion?.estadoConfirmacion}}</span>
+                    <span *ngSwitchCase="'PENDING'" class="p-tag p-tag-warning" style="font-size: 12px;">{{datosAutorizacion?.estadoConfirmacion}}</span>
+                    <span *ngSwitchDefault class="p-tag p-tag-danger" style="font-size: 12px;">{{datosAutorizacion?.estadoConfirmacion}}</span>
+                </span>
+            </ng-template>
+        </div>
+        <div class="md:col-span-1">
+            <span class="font-bold">Estado Autorizacion:&nbsp;</span>
+            <span class="secondary-text">
+                <div *ngIf="datosAutorizacion.reversado; else other_content">
+                    <span class="p-tag p-tag-danger" style="font-size: 12px;">REVERSED</span>
+                </div>
+                <ng-template #other_content>
+                    <span class="p-tag p-tag-success" style="font-size: 12px;">AUTHORIZED</span>
+                </ng-template>
+            </span>
+        </div>
+        <div class="md:col-span-3">
+            <label for="nombreArchivo" class="font-bold block mb-1">Nombre archivo sustento (pdf, jpeg, png, xlsx)</label>
+            <input id="nombreArchivo" type="text" autocomplete="off" pInputText name="nombreArchivo" formControlName="nombreArchivo" readonly>
+            <small class="p-error" *ngIf="formLiberacion.get('nombreArchivo')?.dirty && !formLiberacion.get('nombreArchivo')?.value">Es requerido</small>
+        </div>
+        <div class="md:col-span-3 flex items-end justify-end gap-2">
+            <p-button label="Liberar Manualmente Autorizacion" 
+            (click)="postLiberarManualmenteAutorizacion()" 
+            (keydown.enter)="postLiberarManualmenteAutorizacion()" 
+            (keydown)="postLiberarManualmenteAutorizacion()"
+            [disabled]="disableButton"></p-button>
+            
+            <p-button label="Cerrar" severity="secondary" 
+            (click)="dialogRef.close()"
+            (keydown.enter)="dialogRef.close()" 
+            (keydown)="dialogRef.close()"
+            ></p-button>
+        </div>
+    </div>
+</form>
+
+<p-fileUpload name="files" [auto]="true" customUpload="true" accept=".pdf,.jpeg,.png,.xlsx" maxFileSize="3700000"
+    invalidFileTypeMessageSummary="{0}: archivo invalido, " invalidFileTypeMessageDetail="extensiones permitidas: {0}."
+    (uploadHandler)="uploader($event)" (onClear)="removeAll()" (onRemove)="removeElement($event)" uploadLabel="Cargar"
+    cancelLabel="Cancelar" chooseLabel="Seleccionar archivo"></p-fileUpload>

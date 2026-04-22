@@ -1,0 +1,170 @@
+<p-toast></p-toast>
+<br>
+<form [formGroup]="formBusqueda" novalidate>
+    <div class="grid grid-flow-row-dense sm:grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="md:col-span-1">
+            <label for="tipoBeneficiario" class="block mb-1 text-sm">Tipo beneficiario</label>
+            <p-autoComplete class="w-full" name="tipoBeneficiario" formControlName="tipoBeneficiario"
+                [suggestions]="filteredElement" (completeMethod)="filterElement($event, tipoBeneficiario)"
+                optionLabel="descripcion" emptyMessage='Sin resultados' [dropdown]="true" appendTo="body">
+                <ng-template let-element>
+                    <div>{{element.descripcion}}</div>
+                </ng-template>
+            </p-autoComplete>
+            <p-message *ngIf="formBusqueda.get('tipoBeneficiario')?.dirty && !formBusqueda.get('tipoBeneficiario')?.valid"
+                severity="error" variant="simple" size="small">
+                No es una opción
+            </p-message>
+        </div>
+        <div class="md:col-span-1">
+            <label for="tipoDocumento" class="block mb-1 text-sm">Tipo documento</label>
+            <p-autoComplete class="w-full" name="tipoDocumento" formControlName="tipoDocumento"
+                [suggestions]="filteredElement" (completeMethod)="filterElement($event, tipoDocumento)"
+                (ngModelChange)="changeModelTipoDocumento($event)" optionLabel="descripcion"
+                emptyMessage='Sin resultados' [dropdown]="true" appendTo="body">
+                <ng-template let-element>
+                    <div>{{element.descripcion}}</div>
+                </ng-template>
+            </p-autoComplete>
+            <p-message *ngIf="formBusqueda.get('tipoDocumento')?.dirty && !formBusqueda.get('tipoDocumento')?.valid"
+                severity="error" variant="simple" size="small">
+                No es una opción
+            </p-message>
+        </div>
+        <div class="md:col-span-1">
+            <label for="nroDocumento" class="block mb-1 text-sm">Número de documento</label>
+            <div class="p-inputgroup">
+                <input class="w-full" type="text" autocomplete="off" #valorDocumento pInputText name="nroDocumento"
+                    formControlName="nroDocumento" [attr.minlength]="nroCaracter" [attr.maxlength]="nroCaracter"
+                    oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');">
+                <p-button icon="pi pi-search" severity="secondary" [disabled]="formBusqueda.invalid || valorDocumento.value==''"
+                    (click)="searchPersonas()" (keydown.enter)="searchPersonas()" />
+            </div>
+            <small class="block text-xs text-right" *ngIf="nroCaracter!==0">
+                {{valorDocumento.value.length}} / {{nroCaracter}}
+            </small>
+        </div>
+        <div class="md:col-span-1">
+            <label for="nombres" class="block mb-1 text-sm">Beneficiario</label>
+            <div class="p-inputgroup">
+                <input class="w-full" type="text" autocomplete="off" pInputText name="nombres"
+                    formControlName="nombres">
+                <p-button icon="pi pi-check" severity="secondary" [disabled]="formBusqueda.get('id')?.value==null"
+                    (click)="addBeneficiario()" (keydown.enter)="addBeneficiario()" />
+            </div>
+        </div>
+    </div>
+</form>
+
+<br>
+
+<form [formGroup]="formPagoRetencion">
+    <div formArrayName="beneficiarios">
+        <p-table #dt resizableColumns="true" columnResizeMode="expand" 
+            [value]="beneficiarios.controls" dataKey="id"
+            styleClass="p-datatable-striped p-datatable-gridlines mi-tabla-personalizada">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th scope="col" style="text-align: center;"></th>
+                    <th scope="col">Beneficiario</th>
+                    <th scope="col">Capital</th>
+                    <th scope="col">Porcentaje (%)</th>
+                    <th scope="col">Importe ITF</th>
+                    <th scope="col">Importe de pago</th>
+                    <th scope="col">Medio de pago</th>
+                    <th scope="col">Banco</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-controls let-i="rowIndex">
+                <tr id="tableWithIcon" [formGroupName]="i">
+                    <td style="text-align:center;">
+                        <p-button icon="pi pi-trash" severity="secondary" [text]="true" [rounded]="true"
+                            (click)="removeBeneficiario(i)" (keydown.enter)="removeBeneficiario(i)" />
+                    </td>
+                    <td>
+                        {{beneficiarios.value[i].nombres}}
+                    </td>
+                    <td style="text-align: right;">
+                        {{beneficiarios.value[i].capital | currency:"&nbsp;":"symbol":'1.2-2'}}
+                    </td>
+                    <td style="text-align: right;">
+                        {{beneficiarios.value[i].porcentaje | currency:"&nbsp;":"symbol":'1.2-2'}}
+                    </td>
+                    <td style="text-align: right;">
+                        {{beneficiarios.value[i].importeItf | currency:"&nbsp;":"symbol":'1.2-2'}}
+                    </td>
+                    <td style="text-align: right;">
+                        {{beneficiarios.value[i].importePago | currency:"&nbsp;":"symbol":'1.2-2'}}
+                    </td>
+                    <td>
+                        <p-autoComplete class="w-full" [suggestions]="filteredElement" formControlName="medio"
+                            (completeMethod)="filterElement($event, tipoPago)" field="descripcion"
+                            emptyMessage='Sin resultados' [dropdown]="true" appendTo="body">
+                            <ng-template let-element>
+                                <div>{{element.descripcion}}</div>
+                            </ng-template>
+                        </p-autoComplete>
+                    </td>
+                    <td>
+                        <p-autoComplete class="w-full" [suggestions]="filteredElement" formControlName="banco"
+                            (completeMethod)="filterElement($event, tipoBanco)" field="descripcion"
+                            emptyMessage='Sin resultados' [dropdown]="true" appendTo="body">
+                            <ng-template let-element>
+                                <div>{{element.descripcion}}</div>
+                            </ng-template>
+                        </p-autoComplete>
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="footer">
+                <tr>
+                    <td colspan="9">
+                        <div class="grid grid-flow-row-dense sm:grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="md:col-span-1 text-left">
+                                Saldo final
+                                <br>
+                                <span [ngClass]="{'redColor': activaCss, 'blueColor': !activaCss}"
+                                    style="font-size: 20px;">{{capitalRestante|currency:"&nbsp;":"symbol":'1.2-2'}}</span>
+                            </div>
+                            <div class="md:col-span-1 text-right">
+                                Saldos disponible
+                                <br>
+                                <span style="font-size: 20px;">{{capitalCapturado|currency:"&nbsp;":"symbol":'1.2-2'}}</span>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="9" style="text-align:left">Sin registros encontrados</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+</form>
+
+<form [formGroup]="formPagoRetencion" novalidate>
+    <div class="grid grid-flow-row-dense sm:grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="md:col-span-2">
+            <label for="nombreArchivo"   class="block mb-1 text-sm">Nombre archivo sustento (pdf, jpeg, png, xlsx)</label>
+            <input class="w-full" type="text" autocomplete="off" pInputText name="nombreArchivo"
+                formControlName="nombreArchivo" readonly>
+            <p-message *ngIf="formPagoRetencion.get('nombreArchivo')?.dirty && !formPagoRetencion.get('nombreArchivo')?.valid"
+                severity="error" variant="simple" size="small">
+                Es requerido
+            </p-message>
+        </div>
+        <div class="md:col-span-2">
+            <p-fileUpload class="w-full" name="files" [auto]="true" customUpload="true" accept=".pdf,.jpeg,.png,.xlsx"
+                maxFileSize="3700000" invalidFileTypeMessageSummary="{0}: archivo inválido, "
+                invalidFileTypeMessageDetail="extensiones permitidas: {0}." (uploadHandler)="uploader($event)"
+                (onClear)="removeAll()" (onRemove)="removeElement($event)" uploadLabel="Cargar" cancelLabel="Cancelar"
+                chooseLabel="Seleccionar archivo"></p-fileUpload>
+        </div>
+        <div class="md:col-span-2 flex items-end justify-end gap-2 footer-modal">
+            <p-button label="Aceptar" [disabled]="formPagoRetencion.invalid || loadingFile || disableButton"
+                (click)="pagarRetencion()" (keydown.enter)="pagarRetencion()" />
+        </div>
+    </div>
+</form>

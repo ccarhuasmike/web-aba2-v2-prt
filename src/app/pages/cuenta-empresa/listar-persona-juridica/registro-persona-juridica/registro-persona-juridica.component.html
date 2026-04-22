@@ -1,0 +1,441 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+<form [formGroup]="formPersonaJuridica">
+    <div class="grid grid-flow-row-dense sm:grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Información General -->
+        <div class="md:col-span-3">
+            <h3 class="text-base font-semibold mb-3">Información General</h3>
+        </div>
+        <div class="md:col-span-1">
+            <label for="identDocNumber" class="block mb-1 text-sm font-medium">RUC *</label>
+            <input id="identDocNumber" pInputText type="text" class="w-full" formControlName="identDocNumber" placeholder="11 dígitos"
+                [ngClass]="{'ng-invalid': formPersonaJuridica.get('identDocNumber')?.invalid && formPersonaJuridica.get('identDocNumber')?.dirty}" />
+            <p-message *ngIf="formPersonaJuridica.get('identDocNumber')?.invalid && formPersonaJuridica.get('identDocNumber')?.dirty"
+                severity="error" variant="simple" size="small">
+                RUC inválido (debe ser 11 dígitos)
+            </p-message>
+        </div>
+        <div class="md:col-span-1">
+            <label for="name" class="block mb-1 text-sm font-medium">Razón Social *</label>
+            <input id="name" pInputText type="text" class="w-full" formControlName="name"
+                placeholder="Nombre de la empresa"
+                [ngClass]="{'ng-invalid': formPersonaJuridica.get('name')?.invalid && formPersonaJuridica.get('name')?.dirty}" />
+            <p-message
+                *ngIf="formPersonaJuridica.get('name')?.invalid && formPersonaJuridica.get('name')?.dirty"
+                severity="error" variant="simple" size="small">
+                Razón Social es requerida
+            </p-message>
+        </div>
+        <div class="md:col-span-1">
+            <label for="telefonoContacto" class="block mb-1 text-sm font-medium">Teléfono de Contacto *</label>
+            <input id="telefonoContacto" pInputText type="text" class="w-full" formControlName="telefonoContacto"
+                placeholder="Ej: 014567890"
+                [ngClass]="{'ng-invalid': formPersonaJuridica.get('telefonoContacto')?.invalid && formPersonaJuridica.get('telefonoContacto')?.dirty}" />
+            <p-message
+                *ngIf="formPersonaJuridica.get('telefonoContacto')?.invalid && formPersonaJuridica.get('telefonoContacto')?.dirty"
+                severity="error" variant="simple" size="small">
+                Teléfono inválido
+            </p-message>
+        </div>
+
+        <div class="md:col-span-1">
+            <label for="departamento" class="block mb-1 text-sm font-medium">Departamento *</label>
+            <p-select id="departamento" formControlName="departamento" [options]="departamento" optionLabel="desUbigeo"
+                optionValue="id.dptUbigeo" placeholder="Seleccionar" class="w-full" (onChange)="cargarProvincia($event)"
+                [ngClass]="{'ng-invalid': formPersonaJuridica.get('departamento')?.invalid && formPersonaJuridica.get('departamento')?.dirty}" />
+            <p-message
+                *ngIf="formPersonaJuridica.get('departamento')?.invalid && formPersonaJuridica.get('departamento')?.dirty"
+                severity="error" variant="simple" size="small">
+                Departamento es requerido
+            </p-message>
+        </div>
+        <div class="md:col-span-1">
+            <label for="provincia" class="block mb-1 text-sm font-medium">Provincia *</label>
+            <p-select id="provincia" formControlName="provincia" [options]="provincia" optionLabel="desUbigeo"
+                optionValue="id.prvUbigeo" placeholder="Seleccionar" class="w-full" (onChange)="cargarDistrito($event)"
+                [ngClass]="{'ng-invalid': formPersonaJuridica.get('provincia')?.invalid && formPersonaJuridica.get('provincia')?.dirty}" />
+            <p-message
+                *ngIf="formPersonaJuridica.get('provincia')?.invalid && formPersonaJuridica.get('provincia')?.dirty"
+                severity="error" variant="simple" size="small">
+                Provincia es requerida
+            </p-message>
+        </div>
+        <div class="md:col-span-1">
+            <label for="distrito" class="block mb-1 text-sm font-medium">Distrito *</label>
+            <p-select id="distrito" formControlName="distrito" [options]="distritos" optionLabel="desUbigeo"
+                optionValue="id.dstUbigeo" placeholder="Seleccionar" class="w-full"
+                [ngClass]="{'ng-invalid': formPersonaJuridica.get('distrito')?.invalid && formPersonaJuridica.get('distrito')?.dirty}" />
+            <p-message
+                *ngIf="formPersonaJuridica.get('distrito')?.invalid && formPersonaJuridica.get('distrito')?.dirty"
+                severity="error" variant="simple" size="small">
+                Distrito es requerida
+            </p-message>
+        </div>
+        <div class="md:col-span-3">
+            <label for="direccion" class="block mb-1 text-sm font-medium">Dirección *</label>
+            <input id="direccion" pInputText type="text" class="w-full" formControlName="direccion"
+                placeholder="Dirección completa"
+                [ngClass]="{'ng-invalid': formPersonaJuridica.get('direccion')?.invalid && formPersonaJuridica.get('direccion')?.dirty}" />
+            <p-message
+                *ngIf="formPersonaJuridica.get('direccion')?.invalid && formPersonaJuridica.get('direccion')?.dirty"
+                severity="error" variant="simple" size="small">
+                Dirección es requerida
+            </p-message>
+        </div>
+        <div class="md:col-span-1">
+            <label for="tipoOrganizacion" class="block mb-1 text-sm font-medium">Tipo de Organización *</label>
+            <p-select id="tipoOrganizacion" formControlName="tipoOrganizacion" [options]="tiposOrganizacion"
+                optionLabel="name" optionValue="id" placeholder="Seleccionar" class="w-full"
+                [ngClass]="{'ng-invalid': formPersonaJuridica.get('tipoOrganizacion')?.invalid && formPersonaJuridica.get('tipoOrganizacion')?.dirty}" />
+            <p-message
+                *ngIf="formPersonaJuridica.get('tipoOrganizacion')?.invalid && formPersonaJuridica.get('tipoOrganizacion')?.dirty"
+                severity="error" variant="simple" size="small">
+                Tipo de Organización es requerido
+            </p-message>
+        </div>
+        <div class="md:col-span-1">
+            <label for="sectorActividad" class="block mb-1 text-sm font-medium">Sector de Actividad *</label>
+            <input id="sectorActividad" pInputText type="text" class="w-full" formControlName="sectorActividad"
+                placeholder="Ej: Servicios Financieros"
+                [ngClass]="{'ng-invalid': formPersonaJuridica.get('sectorActividad')?.invalid && formPersonaJuridica.get('sectorActividad')?.dirty}" />
+            <p-message
+                *ngIf="formPersonaJuridica.get('sectorActividad')?.invalid && formPersonaJuridica.get('sectorActividad')?.dirty"
+                severity="error" variant="simple" size="small">
+                Sector de Actividad es requerido
+            </p-message>
+        </div>
+        <div class="md:col-span-1">
+            <label for="clasificacion" class="block mb-1 text-sm font-medium">Clasificación *</label>
+            <p-select id="clasificacion" formControlName="clasificacion" [options]="clasificaciones" optionLabel="name"
+                optionValue="id" placeholder="Seleccionar" class="w-full"
+                [ngClass]="{'ng-invalid': formPersonaJuridica.get('clasificacion')?.invalid && formPersonaJuridica.get('clasificacion')?.dirty}" />
+            <p-message
+                *ngIf="formPersonaJuridica.get('clasificacion')?.invalid && formPersonaJuridica.get('clasificacion')?.dirty"
+                severity="error" variant="simple" size="small">
+                Clasificación es requerida
+            </p-message>
+        </div>
+        <div class="md:col-span-1">
+            <label for="paisConstitucion" class="block mb-1 text-sm font-medium">País de Constitución *</label>
+            <p-select id="paisConstitucion" formControlName="paisConstitucion" [options]="paises" optionLabel="label"
+                optionValue="value" placeholder="Seleccionar" class="w-full"
+                [ngClass]="{'ng-invalid': formPersonaJuridica.get('paisConstitucion')?.invalid && formPersonaJuridica.get('paisConstitucion')?.dirty}" />
+            <p-message
+                *ngIf="formPersonaJuridica.get('paisConstitucion')?.invalid && formPersonaJuridica.get('paisConstitucion')?.dirty"
+                severity="error" variant="simple" size="small">
+                País de Constitución es requerido
+            </p-message>
+        </div>
+        <div class="md:col-span-1">
+            <label for="aplicaITF" class="block mb-1 text-sm font-medium">Aplica ITF</label>
+            <div class="flex items-center">
+                <p-checkbox formControlName="aplicaITF" [binary]="true"></p-checkbox>
+            </div>
+        </div>
+        <!-- Apoderados -->
+        <div class="md:col-span-3">
+            <p-divider></p-divider>
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-base font-semibold">Apoderados</h3>
+                <p-button label="Agregar Apoderado" icon="pi pi-plus" (click)="agregarApoderado()"
+                    (keydown.enter)="agregarApoderado()" (keydown)="agregarApoderado()" size="small"></p-button>
+            </div>
+        </div>
+        <div class="md:col-span-3" *ngIf="apoderados.length > 0">
+            <div *ngFor="let apoderado of apoderados; let i = index" [formGroup]="apoderado"
+                class="bg-gray-50 p-4 rounded mb-4 ">
+                <div class="flex justify-between items-center mb-4">
+                    <h4 class="font-semibold text-base">Apoderado {{ i + 1 }}</h4>
+                    <div class="flex items-center ">
+                        <div class="flex items-center gap-2" *ngIf="apoderado.get('id')?.value > 0">
+                            <span class="text-sm font-medium">Estado:</span>
+                            <p-toggleSwitch formControlName="activo" (onChange)="cambiarEstadoApoderado(i, apoderado)"></p-toggleSwitch>
+                        </div>
+                        <p-button icon="pi pi-trash" severity="danger" text size="small" (click)="eliminarApoderado(i,apoderado)"
+                            (keydown.enter)="eliminarApoderado(i,apoderado)" (keydown)="eliminarApoderado(i,apoderado)"></p-button>
+                    </div>
+                </div>
+                <div class="grid grid-flow-row-dense sm:grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Información General -->
+                    <div class="md:col-span-1">
+                        <label for="documentType" class="block mb-1 text-sm font-medium">Tipo Documento *</label>
+                        <p-select id="documentType" [options]="tiposDocumento" optionLabel="descripcion"
+                            optionValue="id" formControlName="documentType" placeholder="Seleccionar" class="w-full" />
+                        <p-message
+                            *ngIf="apoderado.get('documentType')?.invalid && apoderado.get('documentType')?.dirty"
+                            severity="error" variant="simple" size="small">
+                            Tipo de documento inválido
+                        </p-message>
+                    </div>
+                    <div class="md:col-span-1">
+                        <label for="documentNumber" class="block mb-1 text-sm font-medium">Numero Documento *</label>
+                        <input id="documentNumber" pInputText type="text" class="w-full"
+                            formControlName="documentNumber" placeholder="Ingrese numero de documento"
+                            [ngClass]="{'ng-invalid': apoderado.get('documentNumber')?.invalid && apoderado.get('documentNumber')?.dirty}" />
+                        <p-message
+                            *ngIf="apoderado.get('documentNumber')?.invalid && apoderado.get('documentNumber')?.dirty"
+                            severity="error" variant="simple" size="small">
+                            Número de documento inválido
+                        </p-message>
+                    </div>
+                    <div class="md:col-span-1">
+                        <label for="firstName" class="block mb-1 text-sm font-medium">Nombre *</label>
+                        <input id="firstName" pInputText type="text" class="w-full" formControlName="firstName"
+                            placeholder="Ingrese nombre" />
+                        <p-message *ngIf="apoderado.get('firstName')?.invalid && apoderado.get('firstName')?.dirty"
+                            severity="error" variant="simple" size="small">
+                            Nombre inválido
+                        </p-message>
+                    </div>
+                    <div class="md:col-span-1">
+                        <label for="paternalLastName" class="block mb-1 text-sm font-medium">Apellido Paterno *</label>
+                        <input id="paternalLastName" pInputText type="text" class="w-full"
+                            formControlName="paternalLastName" placeholder="Ingrese apellido paterno" />
+                        <p-message
+                            *ngIf="apoderado.get('paternalLastName')?.invalid && apoderado.get('paternalLastName')?.dirty"
+                            severity="error" variant="simple" size="small">
+                            Apellido Paterno inválido
+                        </p-message>
+                    </div>
+                    <div class="md:col-span-1">
+                        <label for="maternalLastName" class="block mb-1 text-sm font-medium">Apellido Materno *</label>
+                        <input id="maternalLastName" pInputText type="text" class="w-full"
+                            formControlName="maternalLastName" placeholder="Ingrese apellido materno" />
+                        <p-message
+                            *ngIf="apoderado.get('maternalLastName')?.invalid && apoderado.get('maternalLastName')?.dirty"
+                            severity="error" variant="simple" size="small">
+                            Apellido Materno inválido
+                        </p-message>
+                    </div>
+                    <!-- Dirección y Contacto -->
+                    <div class="md:col-span-1">
+                        <label for="address" class="block mb-1 text-sm font-medium">Dirección</label>
+                        <input id="address" pInputText type="text" class="w-full" formControlName="address"
+                            placeholder="Ingrese dirección" />
+                    </div>
+                    <div class="md:col-span-1">
+                        <label for="phone" class="block mb-1 text-sm font-medium">Teléfono</label>
+                        <input id="phone" pInputText type="text" class="w-full" formControlName="phone"
+                            placeholder="Ingrese teléfono" />
+                    </div>
+                    <div class="md:col-span-1">
+                        <label for="email" class="block mb-1 text-sm font-medium">Correo</label>
+                        <input id="email" pInputText type="email" class="w-full" formControlName="email"
+                            placeholder="Ingrese correo" />
+                    </div>
+                    <!-- Participación -->
+                    <div class="md:col-span-1">
+                        <label for="participationPercentage" class="block mb-1 text-sm font-medium">% Participación
+                            *</label>
+                        <p-inputNumber id="participationPercentage" formControlName="participationPercentage"
+                            placeholder="0" class="w-full" [min]="0" [max]="100" />
+
+                        <p-message
+                            *ngIf="apoderado.get('participationPercentage')?.invalid && apoderado.get('participationPercentage')?.dirty"
+                            severity="error" variant="simple" size="small">
+                            % Participación inválido
+                        </p-message>
+                    </div>
+
+                    <div class="md:col-span-3">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-semibold text-sm">Documentos *</h4>
+                            <p-button label="Agregar Documento" icon="pi pi-plus" (click)="agregarDocumentoApoderado(i)"
+                                (keydown.enter)="agregarDocumentoApoderado(i)" (keydown)="agregarDocumentoApoderado(i)"
+                                size="small"></p-button>
+                        </div>
+                        <div *ngIf="obtenerDocumentosApoderado(i).length > 0"
+                            class="grid grid-cols-1 md:grid-cols-1 gap-4">
+                            <div *ngFor="let docIndex of [].constructor(obtenerDocumentosApoderado(i).length); let idx = index"
+                                class="bg-blue-50 p-4 rounded border border-blue-200">
+                                <div [formGroup]="obtenerDocumentoForm(i, idx)">
+                                    <div class="flex justify-between items-start mb-3">
+                                        <div class="flex-1">
+                                            <label for="tipoDocumento{{i}}-{{idx}}"
+                                                class="block text-sm font-medium mb-1">Tipo de Documento *</label>
+                                            <input id="tipoDocumento{{i}}-{{idx}}" pInputText type="text" class="w-full"
+                                                formControlName="tipo"
+                                                placeholder="Ej: Copia de DNI, Vigencia de Poderes" />
+                                        </div>
+                                        <p-button icon="pi pi-trash" severity="danger" text size="small"
+                                            (click)="eliminarDocumentoApoderado(i, idx)"
+                                            (keydown.enter)="eliminarDocumentoApoderado(i, idx)"
+                                            (keydown)="eliminarDocumentoApoderado(i, idx)"></p-button>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="archivo" class="block text-sm font-medium mb-2">Archivo *</label>
+                                        <p-fileUpload id="archivo" name="files" customUpload="true"
+                                            accept=".pdf,.jpeg,.jpg,.png,.xlsx,.xls" maxFileSize="3700000"
+                                            invalidFileTypeMessageSummary="{0}: archivo inválido"
+                                            invalidFileTypeMessageDetail="extensiones permitidas: {0}."
+                                            uploadLabel="Cargar" cancelLabel="Cancelar"
+                                            chooseLabel="Seleccionar archivo" [showUploadButton]="false"
+                                            [showCancelButton]="false"
+                                            (onSelect)="onFileUpload($event, 'apoderado', i, idx)">
+                                        </p-fileUpload>
+                                        <div *ngIf="obtenerDocumentoForm(i, idx).get('archivo')?.value"
+                                            class="mt-2 flex items-center gap-3">
+                                            <i class="pi pi-file text-green-600"></i>
+                                            <span class="text-sm text-gray-700 flex-1">{{
+                                                obtenerDocumentoForm(i, idx).get('archivo')?.value?.nombreArchivo
+                                                }}</span>
+                                            <p-button 
+                                                icon="pi pi-eye" 
+                                                severity="info" 
+                                                text 
+                                                size="small"
+                                                pTooltip="Vista previa"
+                                                tooltipPosition="top"
+                                                (click)="previewDocumento(obtenerDocumentoForm(i, idx).get('archivo')?.value)"
+                                                (keydown.enter)="previewDocumento(obtenerDocumentoForm(i, idx).get('archivo')?.value)"
+                                                (keydown)="previewDocumento(obtenerDocumentoForm(i, idx).get('archivo')?.value)">
+                                            </p-button>
+                                            <p-button 
+                                                icon="pi pi-download" 
+                                                severity="success" 
+                                                text 
+                                                size="small"
+                                                pTooltip="Descargar"
+                                                tooltipPosition="top"
+                                                (click)="descargarDocumento(obtenerDocumentoForm(i, idx).get('archivo')?.value)"
+                                                (keydown.enter)="descargarDocumento(obtenerDocumentoForm(i, idx).get('archivo')?.value)"
+                                                (keydown)="descargarDocumento(obtenerDocumentoForm(i, idx).get('archivo')?.value)">
+                                            </p-button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label for="DocumentoRequerido" class="flex items-center gap-2">
+                                            <p-checkbox id="Documentorequerido" formControlName="requerido"
+                                                [binary]="true"></p-checkbox>
+                                            <span class="text-sm">Documento Requerido</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p-message *ngIf="obtenerDocumentosApoderado(i).length === 0" severity="info" variant="simple"
+                            size="small">
+                            No hay documentos agregados. Haz clic en "Agregar Documento" para añadir.
+                        </p-message>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Archivos Adjuntos -->
+        <div class="md:col-span-3">
+            <p-divider></p-divider>
+            <h3 class="text-base font-semibold mb-4">Archivos Adjuntos</h3>
+        </div>
+
+        <!-- Documentos Requeridos -->
+        <div class="md:col-span-3">
+            <h4 class="font-semibold mb-3 text-sm">Documentos Requeridos *</h4>
+            <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
+                <div *ngFor="let doc of documentosRequeridos; let i = index"
+                    class="bg-blue-50 p-4 rounded border border-blue-200">
+                    <div class="flex justify-between items-start mb-3">
+                        <label for="documentoRequerido{{i}}" class="block text-sm font-medium">{{ doc.tipo }} *</label>
+                        <span *ngIf="!doc.archivo" class="text-xs text-red-600 font-semibold">REQUERIDO</span>
+                        <span *ngIf="doc.archivo" class="text-xs text-green-600 font-semibold">✓ CARGADO</span>
+                    </div>
+                    <p-fileUpload id="documentoRequerido{{i}}" name="files" customUpload="true"
+                        accept=".pdf,.jpeg,.jpg,.png,.xlsx,.xls" maxFileSize="3700000"
+                        invalidFileTypeMessageSummary="{0}: archivo inválido"
+                        invalidFileTypeMessageDetail="extensiones permitidas: {0}." uploadLabel="Cargar"
+                        cancelLabel="Cancelar" chooseLabel="Seleccionar archivo" [showUploadButton]="false"
+                        [showCancelButton]="false" (onSelect)="onFileUpload($event, 'requerido', i)">
+                    </p-fileUpload>
+                    <div *ngIf="doc.archivo" class="mt-2 flex items-center gap-3">
+                        <i class="pi pi-file text-green-600"></i>
+                        <span class="text-sm text-gray-700 flex-1">{{ doc.archivo.nombreArchivo }}</span>
+                        <p-button 
+                            icon="pi pi-eye" 
+                            severity="info" 
+                            text 
+                            size="small"
+                            pTooltip="Vista previa"
+                            tooltipPosition="top"
+                            (click)="previewDocumentoEmpresa(doc.archivo)"
+                            (keydown.enter)="previewDocumentoEmpresa(doc.archivo)"
+                            (keydown)="previewDocumentoEmpresa(doc.archivo)">
+                        </p-button>
+                        <p-button 
+                            icon="pi pi-download" 
+                            severity="success" 
+                            text 
+                            size="small"
+                            pTooltip="Descargar"
+                            tooltipPosition="top"
+                            (click)="descargarDocumentoEmpresa(doc.archivo)"
+                            (keydown.enter)="descargarDocumentoEmpresa(doc.archivo)"
+                            (keydown)="descargarDocumentoEmpresa(doc.archivo)">
+                        </p-button>
+                        <p-button icon="pi pi-times" severity="danger" text size="small" (click)="doc.archivo = null"
+                            (keydown.enter)="doc.archivo = null" (keydown)="doc.archivo = null"></p-button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Documentos Adicionales -->
+        <div class="md:col-span-3">
+            <h4 class="font-semibold mb-3 text-sm mt-6">Documentos Adicionales</h4>
+            <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
+                <div *ngFor="let doc of documentosAdicionales; let i = index" class="bg-gray-50 p-4 rounded">
+                    <div class="flex justify-between items-start mb-3">
+                        <input pInputText type="text" [(ngModel)]="doc.tipo" [ngModelOptions]="{standalone: true}"
+                            placeholder="Nombre del documento (ej: Certificado de constituci\u00f3n)" class="w-full">
+                        <p-button icon="pi pi-trash" severity="danger" text size="small"
+                            (click)="eliminarDocumentoAdicional(i)" (keydown.enter)="eliminarDocumentoAdicional(i)"
+                            (keydown)="eliminarDocumentoAdicional(i)" class="ml-2"></p-button>
+                    </div>
+                    <p-fileUpload name="files" customUpload="true" accept=".pdf,.jpeg,.jpg,.png,.xlsx,.xls"
+                        maxFileSize="3700000" invalidFileTypeMessageSummary="{0}: archivo inválido"
+                        invalidFileTypeMessageDetail="extensiones permitidas: {0}." uploadLabel="Cargar"
+                        cancelLabel="Cancelar" chooseLabel="Seleccionar archivo" [showUploadButton]="false"
+                        [showCancelButton]="false" (onSelect)="onFileUpload($event, 'adicional', i)">
+                    </p-fileUpload>
+                    <div *ngIf="doc.archivo" class="mt-2 flex items-center gap-3">
+                        <i class="pi pi-file text-green-600"></i>
+                        <span class="text-sm text-gray-700 flex-1">{{ doc.archivo.nombreArchivo }}</span>
+                        <p-button 
+                            icon="pi pi-eye" 
+                            severity="info" 
+                            text 
+                            size="small"
+                            pTooltip="Vista previa"
+                            tooltipPosition="top"
+                            (click)="previewDocumento(doc.archivo)"
+                            (keydown.enter)="previewDocumento(doc.archivo)"
+                            (keydown)="previewDocumento(doc.archivo)">
+                        </p-button>
+                        <p-button 
+                            icon="pi pi-download" 
+                            severity="success" 
+                            text 
+                            size="small"
+                            pTooltip="Descargar"
+                            tooltipPosition="top"
+                            (click)="descargarDocumento(doc.archivo)"
+                            (keydown.enter)="descargarDocumento(doc.archivo)"
+                            (keydown)="descargarDocumento(doc.archivo)">
+                        </p-button>
+                        <p-button icon="pi pi-times" severity="danger" text size="small" (click)="doc.archivo = null"
+                            (keydown.enter)="doc.archivo = null" (keydown)="doc.archivo = null"></p-button>
+                    </div>
+                </div>
+            </div>
+            <p-button label="+ Agregar Documento Adicional" icon="pi pi-plus" size="small"
+                (click)="agregarDocumentoAdicional()" (keydown.enter)="agregarDocumentoAdicional()"
+                (keydown)="agregarDocumentoAdicional()" class="mt-4"></p-button>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="md:col-span-3 flex items-end justify-end gap-2 footer-modal">
+            <p-button label="Cancelar" severity="secondary" (click)="cancelar()" (keydown.enter)="cancelar()"
+                (keydown)="cancelar()"></p-button>
+            <p-button label="Registrar" [disabled]="formPersonaJuridica.invalid" (click)="registrar()"
+                (keydown.enter)="registrar()" (keydown)="registrar()"></p-button>
+        </div>
+    </div>
+</form>

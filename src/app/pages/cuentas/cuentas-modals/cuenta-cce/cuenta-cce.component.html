@@ -1,0 +1,55 @@
+<p-toast></p-toast>
+<br>
+<form [formGroup]="formRegistro" novalidate>
+    <div class="grid grid-flow-row-dense sm:grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="md:col-span-2" *ngIf="celularActual">
+            <span><strong>Número actual: </strong> {{celularActual}}</span>
+        </div>
+        <div class="md:col-span-1">
+            <label for="tipoRegistro" class="block mb-1 text-sm">Tipo Registro</label>
+            <p-autoComplete class="w-full" name="tipoRegistro" formControlName="tipoRegistro"
+                [suggestions]="filteredElementTipoRegistro" (completeMethod)="filterElementTipoRegistro($event)"
+                field="nombre" emptyMessage='Sin resultados' [dropdown]="true"
+                (ngModelChange)="changeModelTipoRegistro($event)" appendTo="body">
+                <ng-template let-element>
+                    <div>{{element.nombre}}</div>
+                </ng-template>
+            </p-autoComplete>
+            <p-message *ngIf="formRegistro.get('tipoRegistro')?.dirty && !formRegistro.get('tipoRegistro')?.valid"
+                severity="error" variant="simple" size="small">
+                No es una opción
+            </p-message>
+        </div>
+        <div class="md:col-span-1">
+            <label for="numerocelular" class="block mb-1 text-sm">Nuevo número celular</label>
+            <input class="w-full" type="text" pInputText formControlName="numerocelular" [attr.minlength]="9"
+                [attr.maxlength]="9" autocomplete="off"
+                oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');" />
+            <p-message *ngIf="formRegistro.get('numerocelular')?.dirty && !formRegistro.get('numerocelular')?.valid"
+                severity="error" variant="simple" size="small">
+                Es requerido
+            </p-message>
+        </div>
+        <div class="md:col-span-2">
+            <label for="nombreArchivo" class="block mb-1 text-sm">Archivo sustento (pdf, jpeg, png, doc, docx)</label>
+            <input class="w-full" type="text" autocomplete="off" pInputText name="nombreArchivo"
+                formControlName="nombreArchivo" readonly>
+            <p-message *ngIf="formRegistro.get('nombreArchivo')?.dirty && !formRegistro.get('nombreArchivo')?.valid"
+                severity="error" variant="simple" size="small">
+                Es requerido
+            </p-message>
+        </div>
+        <div class="md:col-span-2">
+            <p-fileUpload name="files" [auto]="true" customUpload="true" accept=".pdf,.jpeg,.png,.doc,.docx"
+                maxFileSize="3700000" invalidFileTypeMessageSummary="{0}: archivo inválido, "
+                invalidFileTypeMessageDetail="extensiones permitidas: {0}." (uploadHandler)="uploader($event)"
+                (onClear)="removeAll()" (onRemove)="removeElement($event)" uploadLabel="Cargar"
+                cancelLabel="Cancelar" chooseLabel="Seleccionar archivo">
+            </p-fileUpload>
+        </div>
+        <div class="md:col-span-2 flex items-end justify-end gap-2 footer-modal">
+            <p-button label="Aceptar" [disabled]="formRegistro.invalid || loadingFile"
+                (click)="guardarNumeroCCE()" (keydown.enter)="guardarNumeroCCE()" />
+        </div>
+    </div>
+</form>
