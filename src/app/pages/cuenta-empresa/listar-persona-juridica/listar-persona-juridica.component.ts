@@ -15,7 +15,7 @@ import { RegistroPersonaJuridicaComponent } from './registro-persona-juridica/re
 import { UsuariosComponent } from './persona-juridica-modals/usuarios/usuarios.component';
 import { RegistrarCuentaComponent } from './persona-juridica-modals/registrar-cuenta/registrar-cuenta.component';
 import { DocumentosPersonaJuridicaComponent } from './documentos-persona-juridica/documentos-persona-juridica.component';
-import { DataCuentaEmpresa, ListaPersonaJuridica } from '@/models/CuentaEmpresa';
+import { CuentaEmpresa, DataCuentaEmpresa, ListaPersonaJuridica } from '@/models/CuentaEmpresa';
 import { CuentaEmpresaService } from '@/pages/service/cuentaempresa.service';
 
 @Component({
@@ -63,6 +63,15 @@ export class ListarPersonaJuridicaComponent implements OnInit {
         this.loadPersonasJuridicas();
     }
 
+    /** La API usa `name` / `identNumber`; el front antiguo usaba `razonSocial` / `ruc`. */
+    nombrePersona(persona: ListaPersonaJuridica | any): string {
+        return persona?.name ?? persona?.razonSocial ?? '';
+    }
+
+    rucPersona(persona: ListaPersonaJuridica | any): string {
+        return persona?.identNumber ?? persona?.ruc ?? '';
+    }
+
     async loadPersonasJuridicas() {
         this.loading = true;
         try {
@@ -95,11 +104,13 @@ export class ListarPersonaJuridicaComponent implements OnInit {
 
         this.loadingCuenta = true;
         try {
-            const response = await this.cuentaEmpresaService.listar_cuenta_por_empresa_juridica({ "clientUids": [customerUid] });
+            const response = await this.cuentaEmpresaService.listar_cuenta_por_empresa_juridica({ clientUids: [customerUid] });
 
-            if (response?.codigo === 1) {
-                this.cuentasPersonaSeleccionada = Array.isArray(response.data) ? response.data : [];
-                console.log(this.cuentasPersonaSeleccionada);
+            const ok = response?.codigo === 0 || response?.codigo === 1;
+            if (ok && Array.isArray(response!.data)) {
+                this.cuentasPersonaSeleccionada = response!.data;
+            } else {
+                this.cuentasPersonaSeleccionada = [];
             }
         } catch (error) {
             console.error('Error al cargar cuentas jurídicas:', error);
@@ -189,13 +200,13 @@ export class ListarPersonaJuridicaComponent implements OnInit {
     onUsers(persona: any, event: any) {
         event.stopPropagation();
         const dialogRef = this.dialogService.open(UsuariosComponent, {
-            header: `Usuarios de ${persona.razonSocial}`,
+            header: `Usuarios de ${this.nombrePersona(persona)}`,
             width: '60vw',
             modal: true,
             styleClass: 'header-modal',
             dismissableMask: true,
             breakpoints: { '960px': '95vw', '640px': '98vw' },
-            data: { idPersonaJuridica: persona.ruc }
+            data: { idPersonaJuridica: this.rucPersona(persona) }
         });
 
         if (dialogRef) {
@@ -217,7 +228,7 @@ export class ListarPersonaJuridicaComponent implements OnInit {
         this.messageService.add({
             severity: 'info',
             summary: 'Información',
-            detail: `Gestionando perfiles de: ${persona.razonSocial}`
+            detail: `Gestionando perfiles de: ${this.nombrePersona(persona)}`
         });
     }
 
@@ -230,10 +241,13 @@ export class ListarPersonaJuridicaComponent implements OnInit {
     //     });
     // }
 
-    onCreateAccount(persona: any, event: any) {
+    async onCreateAccount(persona: any, event: any) {
         event.stopPropagation();
+        this.personaSeleccionada = persona;
+        await this.loadCuentasPersona(persona.customerUid || '');
+
         const dialogRef = this.dialogService.open(RegistrarCuentaComponent, {
-            header: `Crear Cuenta - ${persona.razonSocial}`,
+            header: `Crear Cuenta - ${this.nombrePersona(persona)}`,
             width: '50vw',
             modal: true,
             styleClass: 'header-modal',
@@ -245,11 +259,24 @@ export class ListarPersonaJuridicaComponent implements OnInit {
         if (dialogRef) {
             dialogRef.onClose.subscribe((result: any) => {
                 if (result) {
-                    this.cuentasPersonaSeleccionada.push(result);
+                    const account: CuentaEmpresa = {
+                        product: result.producto,
+                        accountNumber: result.numeroCuenta,
+                        accountStatus: result.estado,
+                        accountOpeningDate: result.fechaApertura,
+                        accountClosingDate: undefined,
+                        accountTypeCode: result.tipoCuenta,
+                        currencyCode: result.codigoMoneda
+                    };
+                    const fila: DataCuentaEmpresa = {
+                        clientUid: persona?.customerUid ?? this.personaSeleccionada?.customerUid,
+                        accounts: [account]
+                    };
+                    this.cuentasPersonaSeleccionada = [...this.cuentasPersonaSeleccionada, fila];
                     this.messageService.add({
                         severity: 'success',
                         summary: 'Éxito',
-                        detail: 'Cuenta creada correctamente'
+                        detail: 'Cuenta creada correctamente (simulación en pantalla; no se envía al servidor).'
                     });
                 }
             });

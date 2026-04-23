@@ -6,7 +6,7 @@ import moment from 'moment';
 import * as forge from 'node-forge';
 import { REQUEST_PARAMETERS, RequestParameterKey } from '../../layout/Utils/constants/aba.constants';
 import CryptoJS from 'crypto-js';
-import { Clasification, TipoOrganizacion, Ubigeos } from '@/models/Common';
+import { Clasification, DataTipoCuenta, TipoOrganizacion, Ubigeos } from '@/models/Common';
 import { Response } from '@/models/Response';
 @Injectable({
     providedIn: 'root'
@@ -344,7 +344,9 @@ export class CommonService {
             });
         });
     }
-
+    listar_tipocuentas(): Promise<Response<DataTipoCuenta> | undefined> {        
+        return this.http.get<Response<DataTipoCuenta>>(`${environment.APICtaAho}/v1/parametro/tipo-cuenta/empresa`).toPromise();
+    }
 
     listar_Clasificacion(): Promise<Response<Clasification> | undefined> {        
         return this.http.get<Response<Clasification>>(`${environment.APIACtaPasiva}/v1/cuentas/empresas/clasificaciones`).toPromise();

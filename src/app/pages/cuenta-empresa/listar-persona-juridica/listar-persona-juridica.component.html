@@ -100,7 +100,7 @@
     <!-- Grilla de Cuentas de la Persona Seleccionada -->
     <div class="card" *ngIf="personaSeleccionada">
         <div class="mb-4">
-            <h3 class="text-2xl font-bold">Cuentas de {{ personaSeleccionada.razonSocial }}</h3>
+            <h3 class="text-2xl font-bold">Cuentas de {{ nombrePersona(personaSeleccionada) }}</h3>
         </div>
         <p-table [value]="cuentasPersonaSeleccionada" class="mi-tabla-personalizada"
             currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros"

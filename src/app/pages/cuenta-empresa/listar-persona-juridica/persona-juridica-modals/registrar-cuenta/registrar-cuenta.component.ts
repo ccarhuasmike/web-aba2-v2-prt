@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -9,7 +9,9 @@ import { TooltipModule } from 'primeng/tooltip';
 import { FileUploadModule } from 'primeng/fileupload';
 import { MessageService } from 'primeng/api';
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
-
+import { CuentaEmpresaService } from '@/pages/service/cuentaempresa.service';
+import { CommonService } from '@/pages/service/commonService';  
+import { ListaTipoCuenum } from '@/models/Common';
 @Component({
     selector: 'app-registrar-cuenta',
     standalone: true,
@@ -22,7 +24,8 @@ import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 })
 export class RegistrarCuentaComponent implements OnInit {
     formCuenta: FormGroup;
-    tiposCuenta: any[] = [];
+
+    tiposCuenta: ListaTipoCuenum[] = [];
     //monedas: any[] = [];
     personaJuridica: any;
     
@@ -36,7 +39,10 @@ export class RegistrarCuentaComponent implements OnInit {
         private readonly fb: FormBuilder,
         private readonly dialogRef: DynamicDialogRef,
         private readonly config: DynamicDialogConfig,
-        public messageService: MessageService
+        private readonly commonService: CommonService,  
+        public messageService: MessageService,
+        private readonly cuentaEmpresaService: CuentaEmpresaService,
+        private readonly cdr: ChangeDetectorRef
     ) {
         this.formCuenta = this.fb.group({
             tipoCuenta: ['', Validators.required],
@@ -45,18 +51,26 @@ export class RegistrarCuentaComponent implements OnInit {
         });
     }
 
-    ngOnInit() {
+    async ngOnInit() {
         this.personaJuridica = this.config.data?.personaJuridica || {};
-        this.loadTiposCuenta();
+        await this.loadTiposCuenta();
         ///this.loadMonedas();
-    }
+    }   
 
-    loadTiposCuenta() {
-        this.tiposCuenta = [
-            { label: 'Ahorros Oh', value: 'AHORROS' },
-            { label: 'Cuenta Corriente', value: 'CORRIENTE' },
-            { label: 'DPF', value: 'DPF' },
-        ];
+    async loadTiposCuenta() {
+
+
+        try {
+            const response = await this.commonService.listar_tipocuentas();
+            
+            if (response?.codigo === 0) {
+                this.tiposCuenta = Array.isArray(response.data.listaTipoCuenta
+                ) ? response.data.listaTipoCuenta : [];
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+        
     }
 
     // loadMonedas() {

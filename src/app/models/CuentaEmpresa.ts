@@ -147,3 +147,16 @@ export interface ArchivoApoderadoYEmpresa {
     createdAt:        Date;
     updatedAt:        null;
 }
+
+/** Catálogo GET .../parametro/tipo-cuenta/empresa (bscuentadebito). */
+export interface TipoCuentaEmpresa {
+    codigo: string;
+    nombre: string;
+    ultimaSecuencia: number;
+    prefijo: string;
+    codigoMoneda: string;
+}
+
+export interface DataListaTipoCuentaEmpresa {
+    listaTipoCuenta: TipoCuentaEmpresa[];
+}

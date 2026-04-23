@@ -4,7 +4,7 @@ import { RegistroModulos } from '@/models/Modulos';
 import { DataResponse, Response } from '@/models/Response';
 import { environment } from 'src/environments/environment';
 import { getHeaders } from './auth-header.util';
-import { ArchivoApoderadoYEmpresa, DataCuentaEmpresa, DataTipoArchivo, ListaPersonaJuridica, RegistroPersonaJuridica } from '@/models/CuentaEmpresa';
+import { ArchivoApoderadoYEmpresa, DataCuentaEmpresa, DataListaTipoCuentaEmpresa, DataTipoArchivo, ListaPersonaJuridica, RegistroPersonaJuridica } from '@/models/CuentaEmpresa';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable({
@@ -21,6 +21,13 @@ export class CuentaEmpresaService {
     return this.http.get<Response<DataTipoArchivo>>(`${environment.APICtaAho}/v1/cuentas/empresas/tipos-archivo`,
       { params }).toPromise();
   }
+
+  listar_tipo_cuenta_empresa(): Promise<Response<DataListaTipoCuentaEmpresa> | undefined> {
+    return this.http
+      .get<Response<DataListaTipoCuentaEmpresa>>(`${environment.APICtaAho}/v1/parametro/tipo-cuenta/empresa`)
+      .toPromise();
+  }
+
   detalle_empresa_id(idempresa: string): Promise<RegistroPersonaJuridica | undefined> {
     return this.http.get<RegistroPersonaJuridica>(`${environment.APICtaAho}/v1/cuentas/empresas/detalle/${idempresa}`).toPromise();
   }

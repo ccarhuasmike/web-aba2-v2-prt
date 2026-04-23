@@ -19,6 +19,18 @@ export interface TipoOrganizacion {
 
 
 
+export interface DataTipoCuenta {
+    listaTipoCuenta: ListaTipoCuenum[]
+  }
+  
+  export interface ListaTipoCuenum {
+    codigo: string
+    nombre: string
+    ultimaSecuencia: number
+    prefijo: string
+    codigoMoneda: string
+  }
+
 
 export interface Ubigeos {
     id:        IDUbigeo;

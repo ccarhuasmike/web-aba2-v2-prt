@@ -4,7 +4,7 @@
     <!-- Título -->
     <div>
         <h2 class="text-2xl font-bold">Crear Nueva Cuenta</h2>
-        <p class="text-sm text-gray-500">Registre una nueva cuenta para: {{ personaJuridica.razonSocial }}</p>
+        <p class="text-sm text-gray-500">Registre una nueva cuenta para: {{ personaJuridica.name || personaJuridica.razonSocial }}</p>
     </div>
 
     <!-- Formulario -->
@@ -12,8 +12,8 @@
         <!-- Tipo de Cuenta -->
         <div>
             <label for="tipoCuenta" class="block mb-2 text-sm font-medium">Tipo de Cuenta *</label>
-            <p-select id="tipoCuenta" [options]="tiposCuenta" formControlName="tipoCuenta" optionLabel="label"
-                optionValue="value" placeholder="Seleccione tipo de cuenta" class="w-full"></p-select>
+            <p-select id="tipoCuenta" [options]="tiposCuenta" formControlName="tipoCuenta" optionLabel="nombre"
+                optionValue="codigo" placeholder="Seleccione tipo de cuenta" class="w-full"></p-select>
         </div>
 
         <!-- Moneda -->
