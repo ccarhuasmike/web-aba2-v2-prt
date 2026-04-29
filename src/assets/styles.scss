@@ -49,3 +49,12 @@
   border-top-right-radius: 10px;
   padding: 1rem;
 }
+
+/* Asegura que overlays de PrimeNG sean clickeables por encima del layout. */
+.p-select-overlay,
+.p-dropdown-panel,
+.p-multiselect-panel,
+.p-datepicker-panel {
+  z-index: 1300 !important;
+  pointer-events: auto;
+}

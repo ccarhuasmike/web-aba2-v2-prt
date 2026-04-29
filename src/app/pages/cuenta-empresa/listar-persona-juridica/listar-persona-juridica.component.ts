@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
@@ -40,8 +40,12 @@ import { CuentaEmpresaService } from '@/pages/service/cuentaempresa.service';
     providers: [MessageService, DialogService],
 })
 export class ListarPersonaJuridicaComponent implements OnInit {
+    @ViewChild('panelCuentasJuridicas') panelCuentasJuridicas?: ElementRef<HTMLElement>;
+
     personasJuridicas: ListaPersonaJuridica[] = [];
     cuentasPersonaSeleccionada: DataCuentaEmpresa[] = [];
+    /** Una fila por cuenta (para la tabla inferior). */
+    cuentasFilasGrilla: { rowId: string; cuenta: CuentaEmpresa }[] = [];
     //cuentasPersonaSeleccionada: any[] = [];
     personaSeleccionada: any = null;
     loading = false;
@@ -121,6 +125,7 @@ export class ListarPersonaJuridicaComponent implements OnInit {
             });
         } finally {
             this.loadingCuenta = false;
+            this.rebuildCuentasFilasGrilla();
         }
 
         // Datos de ejemplo para cuentas de la persona jurídica
@@ -243,8 +248,14 @@ export class ListarPersonaJuridicaComponent implements OnInit {
 
     async onCreateAccount(persona: any, event: any) {
         event.stopPropagation();
+        const isSamePersona = this.personaSeleccionada?.customerUid === persona?.customerUid;
         this.personaSeleccionada = persona;
-        await this.loadCuentasPersona(persona.customerUid || '');
+
+        // Evita pisar cuentas recién agregadas en UI cuando el listado backend viene desfasado.
+        // Solo recarga al cambiar de persona o cuando aún no hay datos en grilla.
+        if (!isSamePersona || this.cuentasPersonaSeleccionada.length === 0) {
+            await this.loadCuentasPersona(persona.customerUid || '');
+        }
 
         const dialogRef = this.dialogService.open(RegistrarCuentaComponent, {
             header: `Crear Cuenta - ${this.nombrePersona(persona)}`,
@@ -259,25 +270,45 @@ export class ListarPersonaJuridicaComponent implements OnInit {
         if (dialogRef) {
             dialogRef.onClose.subscribe((result: any) => {
                 if (result) {
+                    if (result.refreshOnly) {
+                        const optimisticAccount: CuentaEmpresa = {
+                            product: `Cuenta ${result.accountTypeCode ?? ''}`.trim(),
+                            accountNumber: result.accountNumber,
+                            accountStatus: this.mapAccountStatus(result.statusCode),
+                            accountOpeningDate: result.insertDate ? new Date(result.insertDate) : new Date(),
+                            accountClosingDate: undefined,
+                            accountTypeCode: result.accountTypeCode
+                        };
+                        const clientUid = persona?.customerUid ?? this.personaSeleccionada?.customerUid;
+                        this.appendCuentaRegistrada(clientUid, optimisticAccount);
+                        this.scrollToPanelCuentas();
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Éxito',
+                            detail: 'Cuenta creada correctamente'
+                        });
+                        return;
+                    }
                     const account: CuentaEmpresa = {
-                        product: result.producto,
-                        accountNumber: result.numeroCuenta,
-                        accountStatus: result.estado,
-                        accountOpeningDate: result.fechaApertura,
+                        product: `Cuenta ${result.accountTypeCode ?? ''}`.trim(),
+                        accountUid: result.accountUid,
+                        accountNumber: result.accountNumber,
+                        interbankCode: result.accountCciNumber,
+                        accountStatus: this.mapAccountStatus(result.statusCode),
+                        accountOpeningDate: result.insertDate ? new Date(result.insertDate) : undefined,
                         accountClosingDate: undefined,
-                        accountTypeCode: result.tipoCuenta,
-                        currencyCode: result.codigoMoneda
+                        accountTypeCode: result.accountTypeCode
                     };
-                    const fila: DataCuentaEmpresa = {
-                        clientUid: persona?.customerUid ?? this.personaSeleccionada?.customerUid,
-                        accounts: [account]
-                    };
-                    this.cuentasPersonaSeleccionada = [...this.cuentasPersonaSeleccionada, fila];
+                    const clientUid = persona?.customerUid ?? this.personaSeleccionada?.customerUid;
+                    this.appendCuentaRegistrada(clientUid, account);
                     this.messageService.add({
                         severity: 'success',
                         summary: 'Éxito',
-                        detail: 'Cuenta creada correctamente (simulación en pantalla; no se envía al servidor).'
+                        detail: 'Cuenta creada correctamente'
                     });
+                    this.scrollToPanelCuentas();
+                    // No volver a listar aquí: el POST de listado suele devolver datos sin la cuenta recién creada
+                    // y reemplaza la grilla, borrando la fila que acabamos de agregar.
                 }
             });
         }
@@ -308,5 +339,58 @@ export class ListarPersonaJuridicaComponent implements OnInit {
                 }
             });
         }
+    }
+
+    private mapAccountStatus(statusCode: string | undefined): string {
+        const map: Record<string, string> = {
+            '01': 'Activo',
+            '00': 'Inactivo'
+        };
+        return map[statusCode ?? ''] ?? (statusCode || '-');
+    }
+
+    private rebuildCuentasFilasGrilla(): void {
+        const rows: { rowId: string; cuenta: CuentaEmpresa }[] = [];
+        let i = 0;
+        for (const bloque of this.cuentasPersonaSeleccionada) {
+            for (const cuenta of bloque.accounts ?? []) {
+                const rowId = cuenta.accountUid || cuenta.accountNumber || `tmp-${i++}`;
+                rows.push({ rowId, cuenta });
+            }
+        }
+        this.cuentasFilasGrilla = rows;
+    }
+
+    /** Agrega la cuenta recién creada al modelo y refresca la grilla inferior. */
+    private appendCuentaRegistrada(clientUid: string | undefined, account: CuentaEmpresa): void {
+        const uid = clientUid ?? '';
+        const idx = this.cuentasPersonaSeleccionada.findIndex((c) => c.clientUid === uid);
+        if (idx >= 0) {
+            const bloque = this.cuentasPersonaSeleccionada[idx];
+            const cuentas = [...(bloque.accounts ?? [])];
+            const duplicada = cuentas.some(
+                (a) =>
+                    (a.accountUid && account.accountUid && a.accountUid === account.accountUid) ||
+                    (a.accountNumber && account.accountNumber && a.accountNumber === account.accountNumber)
+            );
+            if (!duplicada) {
+                cuentas.push(account);
+            }
+            const copia = [...this.cuentasPersonaSeleccionada];
+            copia[idx] = { ...bloque, accounts: cuentas };
+            this.cuentasPersonaSeleccionada = copia;
+        } else {
+            this.cuentasPersonaSeleccionada = [
+                ...this.cuentasPersonaSeleccionada,
+                { clientUid: uid || undefined, accounts: [account] }
+            ];
+        }
+        this.rebuildCuentasFilasGrilla();
+    }
+
+    private scrollToPanelCuentas(): void {
+        setTimeout(() => {
+            this.panelCuentasJuridicas?.nativeElement?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 150);
     }
 }

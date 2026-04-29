@@ -98,14 +98,15 @@
     </div>
 
     <!-- Grilla de Cuentas de la Persona Seleccionada -->
-    <div class="card" *ngIf="personaSeleccionada">
+    <div class="card" *ngIf="personaSeleccionada" #panelCuentasJuridicas>
         <div class="mb-4">
             <h3 class="text-2xl font-bold">Cuentas de {{ nombrePersona(personaSeleccionada) }}</h3>
+            <p class="text-sm text-gray-500 mt-1">Las cuentas registradas aparecen aquí al confirmar el alta.</p>
         </div>
-        <p-table [value]="cuentasPersonaSeleccionada" class="mi-tabla-personalizada"
+        <p-table [value]="cuentasFilasGrilla" class="mi-tabla-personalizada"
             currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros"
-            [showCurrentPageReport]="true" dataKey="numeroCuenta" [rows]="10" [rowHover]="true" [showGridlines]="true"
-            [paginator]="true" responsiveLayout="scroll" [totalRecords]="cuentasPersonaSeleccionada.length">
+            [showCurrentPageReport]="true" dataKey="rowId" [rows]="10" [rowHover]="true" [showGridlines]="true"
+            [paginator]="true" [loading]="loadingCuenta" responsiveLayout="scroll" [totalRecords]="cuentasFilasGrilla.length">
             <ng-template #header let-columns>
                 <tr>
                     <th scope="col">Producto</th>
@@ -115,16 +116,16 @@
                     <th scope="col" style="text-align: center;">Fecha de Cierre</th>
                 </tr>
             </ng-template>
-            <ng-template #body let-cuenta style="cursor: pointer;">
+            <ng-template #body let-row style="cursor: pointer;">
                 <tr>
-                    <td>{{ cuenta.accounts[0].product }}</td>
-                    <td>{{ cuenta.accounts[0].accountNumber }}</td>
+                    <td>{{ row.cuenta.product }}</td>
+                    <td>{{ row.cuenta.accountNumber }}</td>
                     <td style="text-align: center;">
-                        <span [ngClass]="cuenta.accounts[0].accountStatus === 'Activo' ? 'p-tag p-tag-success' : 'p-tag p-tag-danger'"
-                            style="font-size: 12px;">{{ cuenta.accounts[0].accountStatus }}</span>
+                        <span [ngClass]="row.cuenta.accountStatus === 'Activo' ? 'p-tag p-tag-success' : 'p-tag p-tag-danger'"
+                            style="font-size: 12px;">{{ row.cuenta.accountStatus }}</span>
                     </td>
-                    <td style="text-align: center;">{{ cuenta.accounts[0].accountOpeningDate | date:'dd/MM/yyyy' }}</td>
-                    <td style="text-align: center;">{{ cuenta.accounts[0].accountClosingDate ? (cuenta.accounts[0].accountClosingDate | date:'dd/MM/yyyy') :
+                    <td style="text-align: center;">{{ row.cuenta.accountOpeningDate | date:'dd/MM/yyyy' }}</td>
+                    <td style="text-align: center;">{{ row.cuenta.accountClosingDate ? (row.cuenta.accountClosingDate | date:'dd/MM/yyyy') :
                         '-' }}</td>
                 </tr>
             </ng-template>

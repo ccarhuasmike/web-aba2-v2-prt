@@ -112,7 +112,8 @@
         <p-button label="Cancelar" severity="secondary" (click)="cancelar()" (keydown.enter)="cancelar()"
             (keydown)="cancelar()"></p-button>
         <p-button label="Registrar"
-            [disabled]="formCuenta.invalid || !solicitudApertura || !cartillaInformativa || !terminosCondiciones || !contratoEmpresa"
+            [loading]="submitting"
+            [disabled]="submitting || formCuenta.invalid || !solicitudApertura || !cartillaInformativa || !terminosCondiciones || !contratoEmpresa"
             (click)="registrar()" (keydown.enter)="registrar()" (keydown)="registrar()"></p-button>
     </div>
 </div>

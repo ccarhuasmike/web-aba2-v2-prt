@@ -7,6 +7,32 @@ import { getHeaders } from './auth-header.util';
 import { ArchivoApoderadoYEmpresa, DataCuentaEmpresa, DataListaTipoCuentaEmpresa, DataTipoArchivo, ListaPersonaJuridica, RegistroPersonaJuridica } from '@/models/CuentaEmpresa';
 import { firstValueFrom } from 'rxjs';
 
+export interface RegisterAccountFileAttach {
+  name: string;
+  fileType: string;
+  path: string;
+  extension: string;
+  fileIndex: number;
+}
+
+export interface RegisterAccountRequest {
+  customerUid: string;
+  user: string;
+  accountType: string;
+  filesAttach: RegisterAccountFileAttach[];
+}
+
+export interface RegisterAccountData {
+  accountId: number;
+  accountUid: string;
+  accountTypeCode: string;
+  customerId: number;
+  accountNumber: string;
+  accountCciNumber: string;
+  statusCode: string;
+  reasonCode: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -59,6 +85,10 @@ export class CuentaEmpresaService {
   crear_persona_juridica(request: RegistroPersonaJuridica): Promise<Response<DataResponse> | undefined> {
     const headers = getHeaders("222", "ssds");
     return this.http.post<Response<DataResponse>>(`${environment.APIACtaPasiva}/v1/cuentas/empresas/enrolar-master`, request, { headers }).toPromise();
+  }
+  crear_cuenta_juridica(request: RegisterAccountRequest): Promise<Response<DataResponse> | undefined> {
+    const headers = getHeaders("222", "ssds");
+    return this.http.post<Response<DataResponse>>(`${environment.APIACtaPasiva}/v1/cuentas/registro-cuenta`, request, { headers }).toPromise();
   }
   modify_modulo(request: RegistroModulos): Promise<Response<DataResponse> | undefined> {
     const headers = new HttpHeaders({

@@ -60,6 +60,14 @@ export class AppLayout implements OnDestroy {
         const sidebarEl = document.querySelector('.layout-sidebar');
         const topbarEl = document.querySelector('.layout-menu-button');
         const eventTarget = event.target as Node;
+        const eventElement = event.target as Element | null;
+        const clickedPrimeOverlay = eventElement?.closest(
+            '.p-select-overlay, .p-dropdown-panel, .p-multiselect-panel, .p-datepicker-panel, .p-autocomplete-panel, .p-overlaypanel, .p-dialog, .p-confirm-popup'
+        );
+
+        if (clickedPrimeOverlay) {
+            return false;
+        }
 
         return !(sidebarEl?.isSameNode(eventTarget) || sidebarEl?.contains(eventTarget) || topbarEl?.isSameNode(eventTarget) || topbarEl?.contains(eventTarget));
     }

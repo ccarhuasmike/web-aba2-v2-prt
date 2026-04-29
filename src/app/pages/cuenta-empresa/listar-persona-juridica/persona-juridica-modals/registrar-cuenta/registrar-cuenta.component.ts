@@ -9,7 +9,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { FileUploadModule } from 'primeng/fileupload';
 import { MessageService } from 'primeng/api';
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
-import { CuentaEmpresaService } from '@/pages/service/cuentaempresa.service';
+import { CuentaEmpresaService, RegisterAccountRequest } from '@/pages/service/cuentaempresa.service';
 import { CommonService } from '@/pages/service/commonService';  
 import { ListaTipoCuenum } from '@/models/Common';
 @Component({
@@ -24,6 +24,7 @@ import { ListaTipoCuenum } from '@/models/Common';
 })
 export class RegistrarCuentaComponent implements OnInit {
     formCuenta: FormGroup;
+    submitting = false;
 
     tiposCuenta: ListaTipoCuenum[] = [];
     //monedas: any[] = [];
@@ -159,44 +160,108 @@ export class RegistrarCuentaComponent implements OnInit {
             });
             return;
         }
+        const customerUid = this.personaJuridica?.customerUid;
+        if (!customerUid) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'No se encontró el customerUid de la persona jurídica seleccionada'
+            });
+            return;
+        }
 
-        const nuevaCuenta = {
-            id: Math.floor(Math.random() * 100000),
-            idPersonaJuridica: this.personaJuridica.ruc,
-            numeroCuenta: `${this.personaJuridica.ruc}-${Math.floor(Math.random() * 9999999).toString().padStart(7, '0')}`,
-            tipoCuenta: this.formCuenta.get('tipoCuenta')?.value,
-            //moneda: this.formCuenta.get('moneda')?.value,
-
-            estado: 'Activo',
-            fechaApertura: new Date().toISOString().split('T')[0],
-            saldo: 0,
-            producto: this.getTipoProducto(this.formCuenta.get('tipoCuenta')?.value),
-            documentos: {
-                solicitudApertura: this.solicitudApertura?.name,
-                cartillaInformativa: this.cartillaInformativa?.name,
-                terminosCondiciones: this.terminosCondiciones?.name,
-                contratoEmpresa: this.contratoEmpresa?.name
-            }
+        const request: RegisterAccountRequest = {
+            customerUid,
+            user: 'ADMIN_APP',
+            accountType: this.formCuenta.get('tipoCuenta')?.value,
+            filesAttach: [
+                this.mapFileAttach(this.solicitudApertura, '1', 0),
+                this.mapFileAttach(this.cartillaInformativa, '2', 1),
+                this.mapFileAttach(this.terminosCondiciones, '3', 2),
+                this.mapFileAttach(this.contratoEmpresa, '4', 3)
+            ]
         };
 
-        this.messageService.add({
-            severity: 'success',
-            summary: 'Éxito',
-            detail: 'Cuenta registrada correctamente'
-        });
+        this.submitting = true;
+        this.cuentaEmpresaService.crear_cuenta_juridica(request).then((response) => {
+            const accountData = this.extractAccountData(response);
+            const hasCreatedAccountData = !!(accountData?.accountNumber && accountData?.accountUid);
+            if ((response?.codigo === 0 || response?.codigo === 1) && hasCreatedAccountData) {
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Éxito',
+                    detail: 'Cuenta registrada correctamente'
+                });
+                this.dialogRef.close(accountData);
+                return;
+            }
+            if (hasCreatedAccountData) {
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Éxito',
+                    detail: response?.mensaje || 'Cuenta registrada correctamente'
+                });
+                this.dialogRef.close(accountData);
+                return;
+            }
+            if (response?.codigo === 0 || response?.codigo === 1) {
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Éxito',
+                    detail: response?.mensaje || 'Registro procesado correctamente'
+                });
+                this.dialogRef.close({
+                    refreshOnly: true,
+                    accountTypeCode: request.accountType,
+                    statusCode: '01',
+                    insertDate: new Date().toISOString(),
+                    //accountNumber: response?.data?.accountNumber || `PEND-${Date.now()}`
+                });
+                return;
+            }
 
-        this.dialogRef.close(nuevaCuenta);
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: response?.mensaje || 'No se pudo registrar la cuenta'
+            });
+        }).catch((error) => {
+            console.error('Error registrando cuenta:', error);
+            const backendMessage = error?.error?.mensaje || error?.error?.message || error?.message;
+            const statusMessage = error?.status ? ` (HTTP ${error.status})` : '';
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: backendMessage ? `${backendMessage}${statusMessage}` : `No se pudo registrar la cuenta${statusMessage}`
+            });
+        }).finally(() => {
+            this.submitting = false;
+            this.cdr.markForCheck();
+        });
     }
 
-    private getTipoProducto(tipoCuenta: string): string {
-        const productos: any = {
-            'CORRIENTE': 'Cuenta Corriente',
-            'AHORROS': 'Cuenta de Ahorros',
-            'INVERSION': 'Cuenta de Inversión',
-            'NOMINA': 'Cuenta Nómina',
-            'PLAZO': 'Depósito a Plazo'
+    private extractAccountData(response: any): any {
+        if (!response) {
+            return null;
+        }
+        if (response?.data?.accountNumber && response?.data?.accountUid) {
+            return response.data;
+        }
+        if (response?.accountNumber && response?.accountUid) {
+            return response;
+        }
+        return response?.data ?? null;
+    }
+
+    private mapFileAttach(file: any, fileType: string, fileIndex: number) {
+        const extension = file?.name?.includes('.') ? file.name.split('.').pop() : '';
+        return {
+            name: file?.name ?? '',
+            fileType,
+            path: '/',
+            extension: extension ?? '',
+            fileIndex
         };
-        return productos[tipoCuenta] || 'Cuenta';
     }
 
     cancelar() {

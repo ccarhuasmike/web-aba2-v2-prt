@@ -12,6 +12,16 @@ export const appConfig: ApplicationConfig = {
         provideHttpClient(withFetch()),
         provideAnimationsAsync(),
         providePrimeNG({
+            overlayOptions: {
+                appendTo: 'body',
+                baseZIndex: 1200
+            },
+            zIndex: {
+                modal: 1300,
+                overlay: 1200,
+                menu: 1200,
+                tooltip: 1400
+            },
             translation: {
                 startsWith: 'Empieza con',
                 contains: 'Contiene',
@@ -27,7 +37,7 @@ export const appConfig: ApplicationConfig = {
                 dateIs: 'La fecha es',
                 dateIsNot: 'La fecha no es',
                 dateBefore: 'Antes de',
-                dateAfter: 'DespuÈs de',
+                dateAfter: 'Despuùs de',
                 clear: 'Limpiar',
                 apply: 'Aplicar',
                 matchAll: 'Coincidir todo',
@@ -41,8 +51,8 @@ export const appConfig: ApplicationConfig = {
                 cancel: 'Cancelar',
 
                 // ?? DatePicker
-                dayNames: ['domingo', 'lunes', 'martes', 'miÈrcoles', 'jueves', 'viernes', 's·bado'],
-                dayNamesShort: ['dom', 'lun', 'mar', 'miÈ', 'jue', 'vie', 's·b'],
+                dayNames: ['domingo', 'lunes', 'martes', 'miùrcoles', 'jueves', 'viernes', 'sùbado'],
+                dayNamesShort: ['dom', 'lun', 'mar', 'miù', 'jue', 'vie', 'sùb'],
                 dayNamesMin: ['D', 'L', 'M', 'M', 'J', 'V', 'S'],
                 monthNames: [
                     'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
